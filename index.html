@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>생산 작업지시</title>
+<meta name="theme-color" content="#1B1D20">
+<meta name="application-name" content="생산 작업지시">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="생산 작업지시">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" type="image/png" href="favicon-48.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<style>
+  html,body{margin:0;height:100%;background:#1B1D20;overflow:hidden}
+  body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);box-sizing:border-box}
+  #app{display:block;width:100%;height:100%;border:0;background:#F3F4F5}
+  #splash{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;background:#fff;font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;color:#111827;transition:opacity .3s}
+  #splash img{width:120px;height:120px}
+  #splash b{font-size:22px}
+  #splash span{font-size:16px;color:#475569}
+  #splash.hide{opacity:0;pointer-events:none}
+  #off{display:none;position:fixed;inset:0;align-items:center;justify-content:center;flex-direction:column;gap:14px;background:#fff;font:18px 'Malgun Gothic',sans-serif;color:#111827;text-align:center;padding:24px}
+  #off button{font-size:18px;padding:12px 26px;border-radius:10px;border:0;background:#2F3B47;color:#fff}
+</style>
+</head>
+<body>
+<iframe id="app" title="생산 작업지시" allow="clipboard-read; clipboard-write; fullscreen" allowfullscreen></iframe>
+<div id="splash"><img src="icon-512.png" alt=""><b>생산 작업지시</b><span>여는 중…</span></div>
+<div id="off"><b>인터넷 연결을 확인해 주세요</b><span>연결되면 다시 열립니다.</span><button onclick="location.reload()">다시 열기</button></div>
+<script>
+  // 웹앱 주소 (Apps Script exec) — 주소는 나눠 적어 둠
+  var APP = ['https:', '', 'script.google.com', 'macros', 's',
+    'AKfycbwzWnd2EiNBSQK5jvtXZngQPb1nb1aTjY4DMoXBcKcjWICL0IX-MvxqkbVrpawJZ7hHXQ', 'exec'].join('/');
+  var f = document.getElementById('app'), sp = document.getElementById('splash');
+  function show(){ sp.classList.add('hide'); setTimeout(function(){ sp.style.display='none'; }, 400); }
+  if (!navigator.onLine) { document.getElementById('off').style.display = 'flex'; sp.style.display = 'none'; }
+  else { f.addEventListener('load', show); setTimeout(show, 8000); f.src = APP; }
+  window.addEventListener('online', function(){ if (!f.src) location.reload(); });
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(function(){});
+</script>
+</body>
+</html>
