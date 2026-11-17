@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>생산 작업지시</title>
 <meta name="theme-color" content="#1B1D20">
+<meta name="color-scheme" content="only light">
 <meta name="application-name" content="생산 작업지시">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -15,32 +16,59 @@
 <link rel="icon" type="image/png" href="favicon-48.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <style>
+  :root{color-scheme:only light}
   html,body{margin:0;height:100%;background:#1B1D20;overflow:hidden}
   body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);box-sizing:border-box}
   #app{display:block;width:100%;height:100%;border:0;background:#F3F4F5}
-  #splash{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;background:#fff;font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;color:#111827;transition:opacity .3s}
+  #splash{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;background:#fff;font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;color:#111827;transition:opacity .3s;text-align:center;padding:24px;box-sizing:border-box}
   #splash img{width:120px;height:120px}
   #splash b{font-size:22px}
-  #splash span{font-size:16px;color:#475569}
+  #splash span{font-size:16px;color:#475569;line-height:1.5}
   #splash.hide{opacity:0;pointer-events:none}
+  #splash .btns{display:none;gap:10px;flex-wrap:wrap;justify-content:center}
+  #splash.slow .btns{display:flex}
+  #splash button,#off button{font-size:18px;padding:12px 26px;border-radius:10px;border:0;background:#2F3B47;color:#fff}
+  #splash button.sub{background:#E5E7EB;color:#111827}
   #off{display:none;position:fixed;inset:0;align-items:center;justify-content:center;flex-direction:column;gap:14px;background:#fff;font:18px 'Malgun Gothic',sans-serif;color:#111827;text-align:center;padding:24px}
-  #off button{font-size:18px;padding:12px 26px;border-radius:10px;border:0;background:#2F3B47;color:#fff}
 </style>
 </head>
 <body>
 <iframe id="app" title="생산 작업지시" allow="clipboard-read; clipboard-write; fullscreen" allowfullscreen></iframe>
-<div id="splash"><img src="icon-512.png" alt=""><b>생산 작업지시</b><span>여는 중…</span></div>
+<div id="splash"><img src="icon-512.png" alt=""><b>생산 작업지시</b><span id="msg">여는 중…</span>
+  <div class="btns"><button id="again">다시 열기</button><button class="sub" id="wait">계속 기다리기</button></div></div>
 <div id="off"><b>인터넷 연결을 확인해 주세요</b><span>연결되면 다시 열립니다.</span><button onclick="location.reload()">다시 열기</button></div>
 <script>
   // 웹앱 주소 (Apps Script exec) — 주소는 나눠 적어 둠
   var APP = ['https:', '', 'script.google.com', 'macros', 's',
     'AKfycbwzWnd2EiNBSQK5jvtXZngQPb1nb1aTjY4DMoXBcKcjWICL0IX-MvxqkbVrpawJZ7hHXQ', 'exec'].join('/');
-  var f = document.getElementById('app'), sp = document.getElementById('splash');
-  function show(){ sp.classList.add('hide'); setTimeout(function(){ sp.style.display='none'; }, 400); }
+  // 2026-11-17: 작업지시 화면이 «다 열렸음» 신호(wo:ready)를 보낼 때까지 로고 화면을 계속 보여 줌.
+  //  20초 안에 안 열리면 한 번 저절로 다시 열고, 그래도 안 되면 [다시 열기] 버튼.
+  //  앱을 뒤로 보냈다가 20분 넘게 지나 다시 열면 화면을 새로 엶 (휴대폰이 안쪽 화면을 비워 바탕만 남는 것 방지).
+  var f = document.getElementById('app'), sp = document.getElementById('splash'), msg = document.getElementById('msg');
+  var ready = false, tries = 0, timer = null, hiddenAt = 0;
+  function show() { ready = true; clearTimeout(timer); sp.classList.add('hide'); setTimeout(function () { if (ready) sp.style.display = 'none'; }, 400); }
+  function open(note) {
+    ready = false; tries++; clearTimeout(timer);
+    sp.style.display = 'flex'; sp.classList.remove('hide', 'slow'); msg.textContent = note || '여는 중…';
+    f.src = APP + (tries > 1 ? '?t=' + Date.now() : '');
+    timer = setTimeout(slow, 20000);
+  }
+  function slow() {
+    if (ready) return;
+    if (tries < 2) return open('조금 오래 걸려 다시 여는 중…');
+    sp.classList.add('slow'); msg.textContent = '화면을 여는 데 오래 걸리고 있습니다. 인터넷 연결을 확인하고 [다시 열기]를 눌러 주세요.';
+  }
+  window.addEventListener('message', function (e) { if (e.data && e.data.wo === 'ready') show(); });
+  document.getElementById('again').onclick = function () { tries = 0; open(); };
+  document.getElementById('wait').onclick = function () { sp.classList.remove('slow'); msg.textContent = '여는 중…'; clearTimeout(timer); timer = setTimeout(slow, 20000); };
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden) { hiddenAt = Date.now(); return; }
+    if (hiddenAt && Date.now() - hiddenAt > 20 * 60 * 1000 && navigator.onLine) { tries = 0; open(); }
+  });
   if (!navigator.onLine) { document.getElementById('off').style.display = 'flex'; sp.style.display = 'none'; }
-  else { f.addEventListener('load', show); setTimeout(show, 8000); f.src = APP; }
-  window.addEventListener('online', function(){ if (!f.src) location.reload(); });
-  if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(function(){});
+  else open();
+  window.addEventListener('online', function () { if (!f.src) location.reload(); });
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(function () {});
 </script>
 </body>
 </html>
