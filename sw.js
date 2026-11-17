@@ -1,5 +1,5 @@
 // 생산 작업지시 앱 껍데기 — 껍데기 파일만 저장해 두고, 작업지시 화면은 늘 인터넷에서 새로 받음
-var CACHE = 'wo-shell-v1';
+var CACHE = 'wo-shell-v2';
 var FILES = ['./', 'index.html', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'apple-touch-icon.png', 'favicon.ico', 'favicon-48.png'];
 self.addEventListener('install', function (e) {
   e.waitUntil(caches.open(CACHE).then(function (c) { return c.addAll(FILES); }).then(function () { return self.skipWaiting(); }));
