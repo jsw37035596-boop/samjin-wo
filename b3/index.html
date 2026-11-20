@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>가공실 10~11호</title>
+<meta name="theme-color" content="#000000">
+<meta name="color-scheme" content="only dark">
+<meta name="application-name" content="가공실 10~11호">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="가공실 10~11호">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="../favicon.ico" sizes="any">
+<link rel="icon" type="image/png" href="../favicon-48.png">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png">
+<style>
+  :root{color-scheme:only dark}
+  html,body{margin:0;height:100%;background:#000;overflow:hidden}
+  body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);box-sizing:border-box}
+  #app{display:block;width:100%;height:100%;border:0;background:#000}
+  #splash{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;background:#000;font-family:'Malgun Gothic','맑은 고딕','Apple SD Gothic Neo',sans-serif;color:#fff;transition:opacity .3s;text-align:center;padding:24px;box-sizing:border-box}
+  #splash img{width:120px;height:120px}
+  #splash b{font-size:28px}
+  #splash span{font-size:18px;color:#9AA3AF;line-height:1.5}
+  #splash.hide{opacity:0;pointer-events:none}
+  #splash .btns{display:none;gap:10px;flex-wrap:wrap;justify-content:center}
+  #splash.slow .btns{display:flex}
+  #splash button,#off button{font-size:20px;padding:14px 30px;border-radius:10px;border:0;background:#2F3B47;color:#fff}
+  #splash button.sub{background:#3A3A3A;color:#fff}
+  #off{display:none;position:fixed;inset:0;align-items:center;justify-content:center;flex-direction:column;gap:14px;background:#000;font:20px 'Malgun Gothic',sans-serif;color:#fff;text-align:center;padding:24px}
+</style>
+</head>
+<body>
+<iframe id="app" title="가공실 10~11호" allow="clipboard-read; clipboard-write; fullscreen" allowfullscreen></iframe>
+<div id="splash"><img src="../icon-512.png" alt=""><b>가공실 10~11호</b><span id="msg">여는 중…</span>
+  <div class="btns"><button id="again">다시 열기</button><button class="sub" id="wait">계속 기다리기</button></div></div>
+<div id="off"><b>인터넷 연결을 확인해 주세요</b><span>연결되면 다시 열립니다.</span><button onclick="location.reload()">다시 열기</button></div>
+<script>
+  /* 가공실(성형) 현장 화면 3번 — 작업지시 웹앱의 보기 전용 큰 화면을 띄우는 껍데기 */
+  var APP = ['https:', '', 'script.google.com', 'macros', 's',
+    'AKfycbwzWnd2EiNBSQK5jvtXZngQPb1nb1aTjY4DMoXBcKcjWICL0IX-MvxqkbVrpawJZ7hHXQ', 'exec'].join('/') + '?b=3&k=66e845b4a9074191aa5412de91ca5075';
+  var f = document.getElementById('app'), sp = document.getElementById('splash'), msg = document.getElementById('msg');
+  var ready = false, tries = 0, timer = null, hiddenAt = 0;
+  function show() { ready = true; clearTimeout(timer); sp.classList.add('hide'); setTimeout(function () { if (ready) sp.style.display = 'none'; }, 400); }
+  function open(note) {
+    ready = false; tries++; clearTimeout(timer);
+    sp.style.display = 'flex'; sp.classList.remove('hide', 'slow'); msg.textContent = note || '여는 중…';
+    f.src = APP + (tries > 1 ? '&t=' + Date.now() : '');
+    timer = setTimeout(slow, 20000);
+  }
+  function slow() {
+    if (ready) return;
+    if (tries < 2) return open('조금 오래 걸려 다시 여는 중…');
+    sp.classList.add('slow'); msg.textContent = '화면을 여는 데 오래 걸리고 있습니다. 인터넷 연결을 확인하고 [다시 열기]를 눌러 주세요.';
+  }
+  window.addEventListener('message', function (e) { if (e.data && e.data.wo === 'ready') show(); });
+  document.getElementById('again').onclick = function () { tries = 0; open(); };
+  document.getElementById('wait').onclick = function () { sp.classList.remove('slow'); msg.textContent = '여는 중…'; clearTimeout(timer); timer = setTimeout(slow, 20000); };
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden) { hiddenAt = Date.now(); return; }
+    if (hiddenAt && Date.now() - hiddenAt > 20 * 60 * 1000 && navigator.onLine) { tries = 0; open(); }
+  });
+  /* 24시간 켜 두는 화면: 인터넷이 끊겼다 돌아오면 저절로 다시 엶 */
+  window.addEventListener('online', function () { document.getElementById('off').style.display = 'none'; tries = 0; open(); });
+  window.addEventListener('offline', function () { document.getElementById('off').style.display = 'flex'; });
+  if (!navigator.onLine) { document.getElementById('off').style.display = 'flex'; sp.style.display = 'none'; }
+  else open();
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(function () {});
+</script>
+</body>
+</html>
