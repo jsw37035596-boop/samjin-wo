@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>냉동·수출 생산계획</title>
+<meta name="theme-color" content="#16181B">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.webp" type="image/webp">
+<link rel="apple-touch-icon" href="icon-192.webp">
+<style>
+html,body{margin:0;height:100%;background:#F4F5F7;overflow:hidden;font-family:'Malgun Gothic','Apple SD Gothic Neo',system-ui,sans-serif}
+#app{position:fixed;inset:0;width:100%;height:100%;border:0}
+#splash{position:fixed;inset:0;z-index:5;display:grid;place-items:center;background:#F4F5F7;transition:opacity .35s}
+#splash.out{opacity:0;pointer-events:none}
+#splash div{text-align:center;color:#3D444C;font-weight:700;font-size:15px}
+#splash img{width:128px;height:128px;border-radius:28px;box-shadow:0 10px 30px rgba(20,23,27,.18);display:block;margin:0 auto 16px}
+#off{position:fixed;left:50%;top:10px;transform:translateX(-50%);z-index:9;background:#B42318;color:#fff;border-radius:99px;padding:6px 16px;font-size:14px;font-weight:700;display:none}
+</style></head><body>
+<div id="splash"><div><img src="icon-192.webp" alt="">냉동·수출 생산계획<br><small style="font-weight:500;color:#6B737C">불러오는 중…</small></div></div>
+<div id="off">인터넷 연결이 끊겼습니다</div>
+<iframe id="app" src="https://script.google.com/macros/s/AKfycbw47-qw6a4P-1r1E9ys3wKPtVvgtmQWn1E4Ew3iqhpXTBvC5epCP5x5cZZ2skoBpidJUw/exec" allow="clipboard-read; clipboard-write; fullscreen" title="냉동·수출 생산계획"></iframe>
+<script>
+(function(){
+  var s=document.getElementById('splash'),o=document.getElementById('off');
+  function done(){s.className='out';}
+  window.addEventListener('message',function(e){if(e.data==='fx:ready')done();});
+  setTimeout(done,12000);
+  function net(){o.style.display=navigator.onLine?'none':'block';}
+  window.addEventListener('online',net);window.addEventListener('offline',net);net();
+  if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js');
+})();
+</script>
+</body></html>

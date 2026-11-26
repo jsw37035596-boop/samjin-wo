@@ -1,0 +1,14 @@
+{
+  "name": "냉동·수출 생산계획",
+  "short_name": "생산계획",
+  "description": "삼진식품(주) 냉동·수출 생산계획 — SW WORKS",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#F4F5F7",
+  "theme_color": "#16181B",
+  "lang": "ko",
+  "icons": [
+    { "src": "icon-192.webp", "sizes": "192x192", "type": "image/webp", "purpose": "any" }
+  ]
+}
