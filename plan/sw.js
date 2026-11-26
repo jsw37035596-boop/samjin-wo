@@ -1,5 +1,5 @@
 /* 냉동·수출 생산계획 앱 껍데기: 껍데기 파일만 보관 (자료는 늘 웹앱에서) */
-var C='fx-shell-1';
+var C='fx-shell-2';
 self.addEventListener('install',function(e){self.skipWaiting();e.waitUntil(caches.open(C).then(function(c){return c.addAll(['./','manifest.webmanifest','icon-192.webp']);}));});
 self.addEventListener('activate',function(e){e.waitUntil(self.clients.claim());});
 self.addEventListener('fetch',function(e){
